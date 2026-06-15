@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MHA: All's Justice — 3v3 Generator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--hero:#1A8CFF;--villain:#FF3A3A;--gold:#FFD700;--dark:#07080F;--panel:#0E1018;--card:#12141E;--border:#1E2235;--text:#E8EEFF;--dim:#555A70;}
+body{background:var(--dark);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px 14px 72px;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 55% 35% at 15% 5%,rgba(26,140,255,0.08) 0%,transparent 70%),radial-gradient(ellipse 45% 30% at 85% 85%,rgba(255,58,58,0.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.header{text-align:center;position:relative;z-index:1;margin-bottom:6px;}
+.title{font-family:'Bangers',cursive;font-size:clamp(1.8rem,7vw,3.2rem);letter-spacing:0.08em;line-height:1;color:var(--text);}
+.title .hero{color:var(--hero);}.title .villain{color:var(--villain);}
+.subtitle{font-size:0.68rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--dim);margin-top:5px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 18px;width:100%;max-width:800px;position:relative;z-index:1;margin-top:22px;}
+.filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.pill{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:#0A0C14;color:var(--dim);cursor:pointer;transition:all 0.12s;}
+.pill:hover{border-color:var(--hero);color:var(--text);}
+.pill.active{background:var(--hero);border-color:var(--hero);color:#fff;}
+.pill.villain-pill.active{background:var(--villain);border-color:var(--villain);}
+.pill.dlc-pill.active{background:#9B30FF;border-color:#9B30FF;}
+.btn-wrap{display:flex;justify-content:center;margin-top:4px;}
+.btn-gen{font-family:'Bangers',cursive;font-size:1.2rem;letter-spacing:0.12em;background:linear-gradient(135deg,#1A8CFF,#0055CC);color:#fff;border:none;border-radius:8px;padding:13px 40px;cursor:pointer;transition:transform 0.12s,box-shadow 0.15s;}
+.btn-gen:hover{transform:scale(1.04);box-shadow:0 0 22px rgba(26,140,255,0.4);}
+.btn-gen:active{transform:scale(0.97);}
+#result{display:none;flex-direction:column;gap:14px;margin-top:18px;}
+.teams-row{display:grid;grid-template-columns:1fr 44px 1fr;align-items:start;}
+.team-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 12px;}
+.team-header{font-family:'Bangers',cursive;font-size:1rem;letter-spacing:0.12em;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.team-header.joe{color:var(--hero);}.team-header.jack{color:var(--villain);}
+.fighter-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #14172A;font-size:0.82rem;}
+.fighter-row:last-child{border-bottom:none;}
+.f-num{font-family:'Bangers',cursive;font-size:0.85rem;color:var(--dim);width:18px;flex-shrink:0;}
+.f-role{font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;padding:2px 6px;border-radius:10px;flex-shrink:0;}
+.f-role.main{background:rgba(255,215,0,0.15);color:var(--gold);}
+.f-role.side{background:rgba(255,255,255,0.06);color:var(--dim);}
+.vs-col{display:flex;align-items:center;justify-content:center;padding-top:18px;}
+.vs-badge{font-family:'Bangers',cursive;font-size:1.2rem;letter-spacing:0.08em;color:var(--gold);text-shadow:0 0 10px rgba(255,215,0,0.4);}
+.scenario-box{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--hero);border-radius:10px;padding:16px 14px;}
+.scenario-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--hero);margin-bottom:8px;font-weight:600;}
+.scenario-text{font-size:0.86rem;line-height:1.65;color:#A0AACC;}
+.cursor{display:inline-block;width:2px;height:0.85em;background:var(--hero);margin-left:2px;vertical-align:text-bottom;animation:blink 0.7s steps(1) infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="title"><span class="hero">MHA</span>: All's <span class="villain">Justice</span></div>
+  <div class="subtitle">3v3 Battle Generator — Joe vs CPU</div>
+</div>
+<div class="card">
+  <div class="filter-row">
+    <div class="pill active" data-filter="all">All</div>
+    <div class="pill" data-filter="class1a">Class 1-A</div>
+    <div class="pill" data-filter="pro">Pro Heroes</div>
+    <div class="pill villain-pill" data-filter="villain">Villains</div>
+    <div class="pill villain-pill" data-filter="lov">League of Villains</div>
+    <div class="pill" data-filter="deku">Deku Forms</div>
+    <div class="pill dlc-pill" data-filter="dlc">DLC</div>
+  </div>
+  <div class="btn-wrap">
+    <button class="btn-gen" id="genBtn">⚡ PLUS ULTRA — GENERATE!</button>
+  </div>
+  <div id="result">
+    <div class="teams-row">
+      <div class="team-panel"><div class="team-header joe">Joe's Team</div><div id="teamJoe"></div></div>
+      <div class="vs-col"><div class="vs-badge">VS</div></div>
+      <div class="team-panel"><div class="team-header jack">CPU's Team</div><div id="teamCpu"></div></div>
+    </div>
+    <div class="scenario-box">
+      <div class="scenario-label">📋 Battle Scenario</div>
+      <div class="scenario-text" id="scenarioText"></div>
+    </div>
+  </div>
+</div>
+<script>
+const ALL = [
+  // Deku forms
+  {n:"Izuku Midoriya",t:["class1a","deku"]},{n:"Izuku Midoriya (Shoot Style)",t:["class1a","deku"]},{n:"Izuku Midoriya (Full Cowling 100%)",t:["class1a","deku"]},{n:"Izuku Midoriya (One For All)",t:["class1a","deku"]},{n:"Izuku Midoriya (Rising)",t:["class1a","deku"]},
+  // Class 1-A
+  {n:"Katsuki Bakugo",t:["class1a"]},{n:"Shoto Todoroki",t:["class1a"]},{n:"Ochaco Uraraka",t:["class1a"]},{n:"Tenya Iida",t:["class1a"]},{n:"Eijiro Kirishima",t:["class1a"]},{n:"Fumikage Tokoyami",t:["class1a"]},{n:"Denki Kaminari",t:["class1a"]},{n:"Momo Yaoyorozu",t:["class1a"]},{n:"Kyoka Jiro",t:["class1a"]},{n:"Mina Ashido",t:["class1a"]},{n:"Hanta Sero",t:["class1a"]},{n:"Mashirao Ojiro",t:["class1a"]},{n:"Toru Hagakure",t:["class1a"]},{n:"Tsuyu Asui",t:["class1a"]},{n:"Koji Koda",t:["class1a"]},{n:"Mezo Shoji",t:["class1a"]},{n:"Rikido Sato",t:["class1a"]},{n:"Minoru Mineta",t:["class1a"]},{n:"Yuga Aoyama",t:["class1a"]},{n:"Hitoshi Shinso",t:["class1a"]},
+  // Big 3 & Others
+  {n:"Mirio Togata",t:["class1a"]},{n:"Tamaki Amajiki",t:["class1a"]},{n:"Nejire Hado",t:["class1a"]},{n:"Neito Monoma",t:["class1a"]},
+  // Pro Heroes
+  {n:"All Might",t:["pro"]},{n:"Armored All Might",t:["pro"]},{n:"Endeavor",t:["pro"]},{n:"Hawks",t:["pro"]},{n:"Mirko",t:["pro"]},{n:"Best Jeanist",t:["pro"]},{n:"Shota Aizawa",t:["pro"]},{n:"Present Mic",t:["pro"]},{n:"Midnight",t:["pro"]},{n:"Edge Shot",t:["pro"]},{n:"Lady Nagant",t:["pro","villain"]},
+  // Villains
+  {n:"Tomura Shigaraki",t:["villain","lov"]},{n:"Tomura Shigaraki (All For One)",t:["villain","lov"]},{n:"All For One",t:["villain","lov"]},{n:"All For One (Rewind)",t:["villain","lov"]},{n:"All For One (Chaos)",t:["villain","lov"]},{n:"Dabi",t:["villain","lov"]},{n:"Dabi (Flame of Death)",t:["villain","lov"]},{n:"Himiko Toga",t:["villain","lov"]},{n:"Twice",t:["villain","lov"]},{n:"Mr. Compress",t:["villain","lov"]},{n:"Kurogiri",t:["villain","lov"]},{n:"Stain",t:["villain"]},{n:"High End Nomu",t:["villain"]},
+  // DLC
+  {n:"Star and Stripe",t:["pro","dlc"]},{n:"Nana Shimura",t:["pro","dlc"]},
+];
+
+const SCENARIOS = [
+  "Shigaraki has activated his decay Quirk on a scale no one predicted, and the only thing standing between total collapse and survival is {A}'s squad — but {B}'s team showed up to the same battlefield with completely different orders. Someone in UA High sent conflicting directives, and now both groups are fighting each other while the city crumbles beneath them.",
+  "Twice's Quirk was preserved in a data fragment retrieved by a rogue scientist, who has used it to clone an entire villain task force. {A}'s team arrived to contain the clone outbreak; {B}'s squad was sent to destroy the lab entirely — which {A}'s team is currently standing inside. The clones are multiplying. Both teams are in each other's way.",
+  "All For One's final contingency activated — a sleeper Quirk planted in hero society years ago that forces anyone carrying One For All energy into a combat response. {A}'s fighters have been partially affected. {B}'s team can't tell who's compromised. The only way to neutralize the sleeper Quirk is to push the affected fighters past their limit.",
+  "The UA Sports Festival was hacked. Someone fed false intel into the tournament bracket, pulling both heroes and villain trainees into an off-campus arena that sealed itself on entry. {A}'s team is on one side, {B}'s team is on the other, and the announcements system keeps saying the match will only end when one team can't fight anymore.",
+  "Dabi's flames have spread into a thermal Quirk amplifier buried under the city. {A}'s team is trying to shut it down from inside. {B}'s team was sent to collapse the whole structure before the amplifier detonates — which would kill everyone still inside, including {A}'s fighters. The explosion window is closing.",
+  "Hawks fed both teams the same double-blind mission because he needed to know which group would crack under pressure. {A} was told {B}'s squad had been compromised. {B} was told {A}'s team had gone rogue. Neither briefing is entirely false. Hawks is watching from a rooftop with a notepad and still hasn't decided who to pull out.",
+  "Lady Nagant's rifle round shattered a containment unit holding a Quirk-suppression field now expanding outward, randomly canceling heroes' Quirks on one side and amplifying villains' on the other. {A}'s team landed in the wrong zone. The only way to reset it is through the center of the field — directly between both squads.",
+  "All Might's final form has been reverse-engineered by a black-market Quirk dealer. {B}'s fighters took the boost before the mission; {A}'s team didn't know. Now {B}'s squad is running hotter than normal and the boost is destabilizing. {A}'s team has been tasked with forcibly suppressing them before the power surge levels three city blocks. It's a rescue mission. It just looks exactly like a brawl.",
+  "Shigaraki's final decay wave unraveled a sealed Quirk archive the Hero Commission had buried decades ago, flooding the district with dormant abilities looking for hosts. Every fighter in the area has been randomly assigned a second Quirk they don't know how to control. Both teams are navigating their new abilities while pushing toward the same extraction point.",
+  "Stain escaped. Again. This time he released a manifesto naming specific heroes as frauds not worth protecting — and {A}'s team is on the list. {B}'s squad has been ordered to bring {A}'s fighters in for commission review before Stain targets them. {A}'s team has no intention of standing down. Not with Stain still loose.",
+  "Nana Shimura's ghost has been detected at a fault line between the living world and the next — and both {A} and {B}'s teams received orders to reach her first. The Hero Commission wants the intel she carries. The League wants to use her presence to break Shigaraki's remaining hesitation. Neither team is willing to let the other get there first.",
+  "Star and Stripe's New Order Quirk has malfunctioned at a catastrophic scale after her battle with Shigaraki, declaring a new rule that rewrites the laws of physics across an entire district. {A} and {B}'s teams are both inside the affected zone, where every Quirk works differently than expected. The only way to cancel the rule is to find Star and Stripe — who is somewhere in the middle of both squads.",
+];
+
+let activeFilter='all';
+document.querySelectorAll('.pill').forEach(p=>{p.addEventListener('click',()=>{document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));p.classList.add('active');activeFilter=p.dataset.filter;});});
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function getPool(){return activeFilter==='all'?ALL:ALL.filter(c=>c.t.includes(activeFilter));}
+function pickTeam(pool,exclude=[]){return shuffle(pool.filter(c=>!exclude.includes(c.n))).slice(0,3);}
+function renderTeam(team,id){document.getElementById(id).innerHTML=team.map((f,i)=>`<div class="fighter-row"><span class="f-num">${i+1}</span><span class="f-role ${i===0?'main':'side'}">${i===0?'MAIN':'SIDE'}</span><span>${f.n}</span></div>`).join('');}
+function typewrite(el,text,speed=16){el.innerHTML='';let i=0;const cur=document.createElement('span');cur.className='cursor';el.appendChild(cur);const tick=()=>{if(i<text.length){el.insertBefore(document.createTextNode(text[i++]),cur);setTimeout(tick,speed);}else{cur.remove();}};tick();}
+document.getElementById('genBtn').addEventListener('click',()=>{
+  const pool=getPool();
+  if(pool.length<6){alert('Not enough fighters in this filter. Try All.');return;}
+  const joe=pickTeam(pool), jack=pickTeam(pool,joe.map(f=>f.n));
+  renderTeam(joe,'teamJoe');renderTeam(jack,'teamCpu');
+  document.getElementById('result').style.display='flex';
+  const t=SCENARIOS[Math.floor(Math.random()*SCENARIOS.length)];
+  typewrite(document.getElementById('scenarioText'),t.replace(/\{A\}/g,joe[0].n).replace(/\{B\}/g,jack[0].n));
+});
+</script>
+</body>
+</html>
